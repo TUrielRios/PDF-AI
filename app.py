@@ -20,6 +20,9 @@ executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
 app.register_blueprint(upload_blueprint)
 app.register_blueprint(chat_blueprint)
 app.register_blueprint(health_blueprint)
+@app.route('/')
+def home():
+    return 'Hello, World!'
 
 # Add CORS headers to all responses
 @app.after_request
