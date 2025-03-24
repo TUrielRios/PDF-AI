@@ -54,7 +54,7 @@ def upload_pdf():
             f.write(file_content)
 
         # Generar la URL del archivo
-        file_url = f"http://localhost:5000/files/{filename}"
+        file_url = f"https://pdf-ai-teal.vercel.app/files/{filename}"
 
         # Create a file-like object from the content
         file_io = io.BytesIO(file_content)
