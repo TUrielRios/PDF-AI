@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_from_directory
+from flask import Blueprint, request, jsonify, send_file, make_response
 import io
 import hashlib
 import os
@@ -15,9 +15,8 @@ from services.pdf_service import generate_summary_background
 upload_blueprint = Blueprint('upload', __name__)
 
 # Configuración para almacenar archivos PDF
-UPLOAD_FOLDER = 'uploads'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+file_cache = {}
+
 
 # Thread pool for background processing
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
@@ -44,17 +43,14 @@ def upload_pdf():
         
         # Check if we've already processed this file
         if file_hash in pdf_cache:
-            print(f"Using cached result for file: {file.filename}")
-            return jsonify(pdf_cache[file_hash])
+                print(f"Using cached result for file: {file.filename}")
+                return jsonify(pdf_cache[file_hash])
 
-        # Guardar el archivo en el servidor
-        filename = f"{file_hash}.pdf"
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        with open(file_path, 'wb') as f:
-            f.write(file_content)
+        # Guarda el PDF en memoria en lugar de disco
+        file_cache[file_hash] = file_content  # <-- Almacena bytes en memoria
 
-        # Generar la URL del archivo
-        file_url = f"https://pdf-ai-teal.vercel.app/files/{filename}"
+        # Genera una URL virtual (no es un archivo real)
+        file_url = f"https://pdf-ai-teal.vercel.app/api/temp-pdf/{file_hash}"
 
         # Create a file-like object from the content
         file_io = io.BytesIO(file_content)
@@ -121,6 +117,14 @@ def upload_pdf():
         traceback.print_exc()
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
-@upload_blueprint.route('/files/<filename>', methods=['GET'])
-def serve_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+@upload_blueprint.route('/api/temp-pdf/<file_hash>', methods=['GET'])
+def serve_temp_pdf(file_hash):
+    if file_hash not in file_cache:
+        return jsonify({"error": "Archivo no encontrado"}), 404
+    
+    # Crea una respuesta con los bytes del PDF
+    pdf_bytes = file_cache[file_hash]
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename={file_hash}.pdf'
+    return response
