@@ -9,7 +9,7 @@ import concurrent.futures
 from utils.cache_utils import pdf_cache, add_to_cache
 from utils.text_utils import extract_key_info
 from utils.gemini_utils import generate_text
-from services.pdf_service import generate_summary_background
+from services.pdf_service import generate_summary_background, extract_text_from_pdf_images
 
 # Create a blueprint for upload routes
 upload_blueprint = Blueprint('upload', __name__)
@@ -69,8 +69,10 @@ def upload_pdf():
                 else:
                     print(f"Warning: Could not extract text from page {i+1} in {file.filename}")
             
-            if not pages:
-                return jsonify({"error": "Could not extract any text from the PDF"}), 400
+            if not pages:  # Si no se extrajo texto normal
+                ocr_text = extract_text_from_pdf_images(file_content)
+                if ocr_text:
+                    pages = {1: ocr_text}  # Usar el texto de OCR
             
             # Get text from first page for explanation
             first_page_text = pages.get(1, "")
