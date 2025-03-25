@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify, Response, stream_with_context
 import traceback
 
-from utils.text_utils import  extract_summary_text
-from utils.gemini_utils import  generate_text_internal
-from utils.cache_utils import summary_cache, get_from_cache, add_to_cache, generate_summary_cache_key
+from utils.text_utils import extract_relevant_context, extract_summary_text
+from utils.gemini_utils import generate_text, generate_text_internal
+from utils.cache_utils import summary_cache, get_from_cache, add_to_cache, generate_summary_cache_key, pdf_cache
+from services.pdf_service import generate_summary_background
 import concurrent.futures
 
 # Create a blueprint for chat routes
@@ -41,16 +42,23 @@ def summarize_page():
         prompt = f"""
         Eres un experto en síntesis de información. Tu tarea es generar un resumen del siguiente texto siguiendo estas pautas:
 
-        1. Extrae los puntos clave y los organiza de manera lógica.
-        2. Incluye ejemplos o datos relevantes si están disponibles.
-        3. Limita el resumen a 150-200 palabras.
-        4. Usa un lenguaje claro y profesional.
-        5. Responde únicamente en español.
-        Una vez tengas todo esto claro realizar un resumen organizado y estructurado en formato Markdown (sin HTML).
-        Usa etiquetas como p, h1, h2, h3, strong, em,ul, li.
+        1. Identifica el propósito principal del texto.
+        2. Extrae los puntos clave y los organiza de manera lógica.
+        3. Incluye ejemplos o datos relevantes si están disponibles.
+        4. Limita el resumen a 150-200 palabras.
+        5. Usa un lenguaje claro y profesional.
+        6. Responde únicamente en español.
+        7. IMPORTANTE: Formatea tu respuesta usando Markdown para mejorar la legibilidad.
+           - Usa # para títulos principales
+           - Usa ## para subtítulos
+           - Usa ### para secciones menores
+           - Usa **texto** para negritas en conceptos importantes
+           - Usa *texto* para cursivas en definiciones o términos clave
+           - Usa listas con - o 1. para enumerar puntos importantes
+           - Usa > para citas o ejemplos destacados
 
         Texto:
-        {text}
+        {short_text}
         """
 
         # Generar la respuesta en streaming
@@ -62,6 +70,7 @@ def summarize_page():
         print(f"Error en el endpoint de resumen: {str(e)}")
         traceback.print_exc()
         return jsonify({"error": f"Error procesando la solicitud: {str(e)}"}), 500
+
 def generate_summary_stream(response_stream, cache_key):
     """Generar un resumen en streaming para el cliente."""
     full_summary = ""  # Almacenar el resumen completo para caché
@@ -75,6 +84,7 @@ def generate_summary_stream(response_stream, cache_key):
         print(f"Error en generate_summary_stream: {str(e)}")
         traceback.print_exc()
         yield f"data: Error en el streaming: {str(e)}\n\n"
+
 
 @chat_blueprint.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
