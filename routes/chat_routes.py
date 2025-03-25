@@ -37,20 +37,29 @@ def summarize_page():
         # Extraer una versión más corta del texto
         short_text = extract_summary_text(text)
 
-        # Crear el prompt para el resumen
         prompt = f"""
-        Eres un experto en síntesis de información. Tu tarea es generar un resumen del siguiente texto siguiendo estas pautas:
+        Como experto en síntesis, genera un resumen EN ESPAÑOL del siguiente texto con estas reglas estrictas:
 
-        1. Extrae los puntos clave y los organiza de manera lógica.
-        2. Incluye ejemplos o datos relevantes si están disponibles.
-        3. Limita el resumen a 150-200 palabras.
-        4. Usa un lenguaje claro y profesional.
-        5. Responde únicamente en español.
-        Una vez tengas todo esto claro realizar un resumen organizado y estructurado en formato Markdown (sin HTML).
-        Usa etiquetas como p, h1, h2, h3, strong, em,ul, li.
+        1. **Formato Markdown perfectamente estructurado**:
+        - Encabezados: ## para títulos principales, ### para subtítulos
+        - Párrafos separados por 2 saltos de línea
+        - Listas con viñetas (•)
+        - Negritas para términos clave
 
-        Texto:
-        {short_text}
+        2. **Contenido**:
+        - Máximo 200 palabras
+        - Lenguaje técnico pero claro
+        - Sin repeticiones
+        - Sin frases incompletas o errores gramaticales
+
+        3. **Estructura**:
+        1. Concepto principal
+        2. Características clave
+        3. Proceso/metodología
+        4. Ejemplo (si aplica)
+
+        Texto a resumir:
+        {text}
         """
 
         # Generar la respuesta en streaming
