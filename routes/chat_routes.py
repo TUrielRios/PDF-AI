@@ -46,7 +46,8 @@ def summarize_page():
         3. Limita el resumen a 150-200 palabras.
         4. Usa un lenguaje claro y profesional.
         5. Responde únicamente en español.
-        Una vez tengas todo esto claro realizar un resumen organizado y estructurado
+        Una vez tengas todo esto claro realizar un resumen organizado y estructurado en formato Markdown (sin HTML).
+        Usa etiquetas como p, h1, h2, h3, strong, em,ul, li.
 
         Texto:
         {short_text}
