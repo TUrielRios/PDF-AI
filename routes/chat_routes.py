@@ -39,17 +39,17 @@ def summarize_page():
 
         # Crear el prompt para el resumen
         prompt = f"""
-        Eres un experto en síntesis de información. Tu tarea es generar un resumen del siguiente texto siguiendo estas pautas:
+        Genera un resumen conciso del siguiente texto con formato Markdown optimizado para visualización.
+        Sigue estrictamente estas reglas:
 
-        1. Extrae los puntos clave y los organiza de manera lógica.
-        2. Incluye ejemplos o datos relevantes si están disponibles.
-        3. Limita el resumen a 150-200 palabras.
-        4. Usa un lenguaje claro y profesional.
-        5. Responde únicamente en español.
-        Una vez tengas todo esto claro realizar un resumen organizado y estructurado
+        1. Usa exactamente 2 saltos de línea entre párrafos
+        2. Encabezados con ## para secciones principales
+        3. **Negritas** para términos clave
+        4. Viñetas para listas
+        5. Entre 150 y 200 palabras
 
-        Texto:
-        {short_text}
+        Texto a resumir:
+        {text}
         """
 
         # Generar la respuesta en streaming
