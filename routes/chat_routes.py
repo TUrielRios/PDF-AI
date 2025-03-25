@@ -49,8 +49,7 @@ def summarize_page():
         5. Usa un lenguaje claro y profesional.
         6. Responde únicamente en español.
         7. IMPORTANTE: Formatea tu respuesta usando Markdown para mejorar la legibilidad.
-           - Usa # para títulos principales
-           - Usa ## para subtítulos
+           - No uses titulos ni encabezados, ve directo al contenido
            - Usa ### para secciones menores
            - Usa **texto** para negritas en conceptos importantes
            - Usa *texto* para cursivas en definiciones o términos clave
@@ -58,7 +57,7 @@ def summarize_page():
            - Usa > para citas o ejemplos destacados
 
         Texto:
-        {short_text}
+        {text}
         """
 
         # Generar la respuesta en streaming
