@@ -46,7 +46,7 @@ def summarize_page():
         2. Párrafos separados por 2 saltos de línea
         3. Listas con viñetas para características
         4. Lenguaje claro y preciso
-        5. Máximo 150 palabras
+        5. entre 150 y 200 palabras
 
         Corrige cualquier error gramatical del texto original.
 
