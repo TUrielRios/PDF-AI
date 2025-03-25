@@ -46,7 +46,7 @@ def summarize_page():
         2. Párrafos separados por 2 saltos de línea
         3. Listas con viñetas para características
         4. Lenguaje claro y preciso
-        5. entre 150 y 200 palabras
+        5. Entre 150 y 200 palabras
 
         Corrige cualquier error gramatical del texto original.
 
@@ -56,11 +56,9 @@ def summarize_page():
 
         # Generar la respuesta en streaming
         response_stream = generate_text_internal(prompt, stream=True)
-        clean_response = response_stream.replace("<br>", "\n\n")  # Elimina tags HTML
-
 
         # Devolver la respuesta en streaming
-        return Response(stream_with_context(generate_summary_stream(clean_response, cache_key)), mimetype="text/event-stream")
+        return Response(stream_with_context(generate_summary_stream(response_stream, cache_key)), mimetype="text/event-stream")
     except Exception as e:
         print(f"Error en el endpoint de resumen: {str(e)}")
         traceback.print_exc()
