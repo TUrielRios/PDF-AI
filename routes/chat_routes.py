@@ -39,19 +39,17 @@ def summarize_page():
 
         # Crear el prompt para el resumen
         prompt = f"""
-        Por favor, genera un resumen profesional del siguiente texto sobre algoritmos.
-        Sigue estrictamente estas reglas:
+        Eres un experto en síntesis de información. Tu tarea es generar un resumen del siguiente texto siguiendo estas pautas:
 
-        1. Formato Markdown válido (sin HTML)
-        2. Párrafos separados por 2 saltos de línea
-        3. Listas con viñetas para características
-        4. Lenguaje claro y preciso
-        5. Entre 150 y 200 palabras
+        1. Extrae los puntos clave y los organiza de manera lógica.
+        2. Incluye ejemplos o datos relevantes si están disponibles.
+        3. Limita el resumen a 150-200 palabras.
+        4. Usa un lenguaje claro y profesional.
+        5. Responde únicamente en español.
+        Una vez tengas todo esto claro realizar un resumen organizado y estructurado
 
-        Corrige cualquier error gramatical del texto original.
-
-        Texto original:
-        {text}
+        Texto:
+        {short_text}
         """
 
         # Generar la respuesta en streaming
