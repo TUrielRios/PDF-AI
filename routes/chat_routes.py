@@ -39,24 +39,28 @@ def summarize_page():
 
         # Crear el prompt para el resumen
         prompt = f"""
-        Genera un resumen conciso del siguiente texto con formato Markdown optimizado para visualización.
+        Por favor, genera un resumen profesional del siguiente texto sobre algoritmos.
         Sigue estrictamente estas reglas:
 
-        1. Usa exactamente 2 saltos de línea entre párrafos
-        2. Encabezados con ## para secciones principales
-        3. **Negritas** para términos clave
-        4. Viñetas para listas
-        5. Entre 150 y 200 palabras
+        1. Formato Markdown válido (sin HTML)
+        2. Párrafos separados por 2 saltos de línea
+        3. Listas con viñetas para características
+        4. Lenguaje claro y preciso
+        5. Máximo 150 palabras
 
-        Texto a resumir:
+        Corrige cualquier error gramatical del texto original.
+
+        Texto original:
         {text}
         """
 
         # Generar la respuesta en streaming
         response_stream = generate_text_internal(prompt, stream=True)
+        clean_response = response_stream.replace("<br>", "\n\n")  # Elimina tags HTML
+
 
         # Devolver la respuesta en streaming
-        return Response(stream_with_context(generate_summary_stream(response_stream, cache_key)), mimetype="text/event-stream")
+        return Response(stream_with_context(generate_summary_stream(clean_response, cache_key)), mimetype="text/event-stream")
     except Exception as e:
         print(f"Error en el endpoint de resumen: {str(e)}")
         traceback.print_exc()
