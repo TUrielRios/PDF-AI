@@ -3,7 +3,6 @@ import time
 import traceback
 from config import GEMINI_API_KEY, DEFAULT_MODEL, DEFAULT_MAX_TOKENS
 from utils.cache_utils import generate_text_hash, get_from_cache, add_to_cache, prompt_cache
-import re
 
 # Configurar la API de Gemini
 genai.configure(api_key=GEMINI_API_KEY)
@@ -69,3 +68,4 @@ def check_gemini_health():
             "status": "not_running",
             "model_available": False
         }
+

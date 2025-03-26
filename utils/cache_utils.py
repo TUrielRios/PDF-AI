@@ -3,7 +3,6 @@ import hashlib
 # Simple in-memory caches
 pdf_cache = {}
 prompt_cache = {}
-summary_cache = {}
 
 def generate_text_hash(prompt_str):
     """Create a hash of the prompt string for caching"""

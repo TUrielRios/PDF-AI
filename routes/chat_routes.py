@@ -3,7 +3,6 @@ import traceback
 
 from utils.text_utils import extract_relevant_context, extract_summary_text
 from utils.gemini_utils import generate_text, generate_text_internal
-from utils.cache_utils import summary_cache, get_from_cache, add_to_cache, generate_summary_cache_key, pdf_cache
 from services.pdf_service import generate_summary_background
 import concurrent.futures
 
@@ -27,14 +26,7 @@ def summarize_page():
         text = data["text"]
         page = data.get("page", 0)
         file_hash = data.get("file_hash", "unknown")
-
-        # Verificar si ya tenemos este resumen en caché
-        cache_key = generate_summary_cache_key(file_hash, page)
-        cached_summary = get_from_cache(summary_cache, cache_key)
-        if cached_summary:
-            print(f"Usando resumen en caché para la página {page}")
-            return jsonify({"summary": cached_summary})
-
+        
         # Extraer una versión más corta del texto
         short_text = extract_summary_text(text)
 
@@ -50,7 +42,6 @@ def summarize_page():
         6. Responde únicamente en español.
         7. IMPORTANTE: Formatea tu respuesta usando Markdown para mejorar la legibilidad.
            - No uses titulos ni encabezados, ve directo al contenido
-           - Usa ### para secciones menores
            - Usa **texto** para negritas en conceptos importantes
            - Usa *texto* para cursivas en definiciones o términos clave
            - Usa listas con - o 1. para enumerar puntos importantes
@@ -60,30 +51,16 @@ def summarize_page():
         {text}
         """
 
-        # Generar la respuesta en streaming
-        response_stream = generate_text_internal(prompt, stream=True)
-
-        # Devolver la respuesta en streaming
-        return Response(stream_with_context(generate_summary_stream(response_stream, cache_key)), mimetype="text/event-stream")
+        # Generar la respuesta completa (sin streaming)
+        response = generate_text_internal(prompt, stream=False)
+        print(f"Respuesta completa generada: {response}")
+        
+        # Devolver la respuesta completa como JSON
+        return jsonify({"summary": response})
     except Exception as e:
         print(f"Error en el endpoint de resumen: {str(e)}")
         traceback.print_exc()
         return jsonify({"error": f"Error procesando la solicitud: {str(e)}"}), 500
-
-def generate_summary_stream(response_stream, cache_key):
-    """Generar un resumen en streaming para el cliente."""
-    full_summary = ""  # Almacenar el resumen completo para caché
-    try:
-        for chunk in response_stream:
-            yield f"data: {chunk.text}\n\n"  # Enviar cada chunk como un evento SSE
-            full_summary += chunk.text  # Acumular el resumen completo
-        # Almacenar el resumen completo en caché
-        add_to_cache(summary_cache, cache_key, full_summary)
-    except Exception as e:
-        print(f"Error en generate_summary_stream: {str(e)}")
-        traceback.print_exc()
-        yield f"data: Error en el streaming: {str(e)}\n\n"
-
 
 @chat_blueprint.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
@@ -103,9 +80,6 @@ def chat():
         if not context:
             return jsonify({"error": "Falta el contexto"}), 400
 
-        # Extraer solo las partes más relevantes del contexto
-        # reduced_context = extract_relevant_context(question, context)
-
         # Crear el prompt para el chat
         prompt = f"""
         Eres un asistente inteligente que responde preguntas basadas en un contexto proporcionado. Sigue estas instrucciones:
@@ -123,22 +97,13 @@ def chat():
         {context}
         """
 
-        # Generar la respuesta en streaming
-        response_stream = generate_text_internal(prompt, stream=True)
-
-        # Devolver la respuesta en streaming
-        return Response(stream_with_context(generate_streaming_response(response_stream)), mimetype="text/event-stream")
+        # Generar la respuesta completa (sin streaming)
+        response = generate_text_internal(prompt, stream=False)
+        
+        # Devolver la respuesta completa como JSON
+        return jsonify({"answer": response})
     except Exception as e:
         print(f"Error en el endpoint de chat: {str(e)}")
         traceback.print_exc()
         return jsonify({"error": f"Error procesando la solicitud: {str(e)}"}), 500
 
-def generate_streaming_response(response_stream):
-    """Generar una respuesta en streaming para el cliente."""
-    try:
-        for chunk in response_stream:
-            yield f"data: {chunk.text}\n\n"  # Enviar cada chunk como un evento SSE
-    except Exception as e:
-        print(f"Error en generate_streaming_response: {str(e)}")
-        traceback.print_exc()
-        yield f"data: Error en el streaming: {str(e)}\n\n"

@@ -50,6 +50,7 @@ def upload_pdf():
         file_cache[file_hash] = file_content  # <-- Almacena bytes en memoria
 
         # Genera una URL virtual (no es un archivo real)
+        #file_url = f"http://localhost:5000/api/temp-pdf/{file_hash}"
         file_url = f"https://pdf-ai-teal.vercel.app/api/temp-pdf/{file_hash}"
 
         # Create a file-like object from the content
