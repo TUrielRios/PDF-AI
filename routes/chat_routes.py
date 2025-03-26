@@ -97,13 +97,28 @@ def chat():
         {context}
         """
 
-        # Generar la respuesta completa (sin streaming)
-        response = generate_text_internal(prompt, stream=False)
-        
-        # Devolver la respuesta completa como JSON
-        return jsonify({"answer": response})
+        # Generar la respuesta en streaming
+        response_stream = generate_text_internal(prompt, stream=True)
+
+        # Devolver la respuesta en streaming
+        return Response(stream_with_context(generate_streaming_response(response_stream)), mimetype="text/event-stream")
     except Exception as e:
         print(f"Error en el endpoint de chat: {str(e)}")
         traceback.print_exc()
         return jsonify({"error": f"Error procesando la solicitud: {str(e)}"}), 500
+
+def generate_streaming_response(response_stream):
+    """Generar una respuesta en streaming para el cliente."""
+    try:
+        for chunk in response_stream:
+            # Procesar cada chunk para asegurar que los saltos de línea se manejen correctamente
+            chunk_text = chunk.text
+            # Reemplazar saltos de línea con espacios para evitar problemas con SSE
+            chunk_text = chunk_text.replace('\n', ' ')
+            # Enviar cada chunk como un evento SSE
+            yield f"data: {chunk_text}\n\n"
+    except Exception as e:
+        print(f"Error en generate_streaming_response: {str(e)}")
+        traceback.print_exc()
+        yield f"data: Error en el streaming: {str(e)}\n\n"
 
